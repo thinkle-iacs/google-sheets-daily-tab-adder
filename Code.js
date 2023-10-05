@@ -1,21 +1,21 @@
 /**
- * 
- * Note: a master version of this code should be kept in this 
+ *
+ * Note: a master version of this code should be kept in this
  * github repo: https://github.com/thinkle-iacs/google-sheets-daily-tab-adder
- * 
+ *
  * Please port improvements back there!
- * 
+ *
  * ChangeLog:
  * 10/5/24
  * - Added ability to start adding sheets in the future.
  * - Added ability to run on only a given day of the week.
  * - Restored ability to add more than one sheet if we want to from previous versions.
- * 
+ *
  * 8/25/23
  * - FEATURE: Added Menu and interactive version of "Clear Sheets" to allow users to clear
  * - BUGFIX: ClearSheets had a RegExp that only worked up to 2020; fixed for the future :)
- * 
-*/
+ *
+ */
 /* @OnlyCurrentDoc */
 
 function onOpen(e) {
@@ -53,6 +53,7 @@ function onOpen(e) {
     .addSubMenu(createSheetsMenu)
     .addSubMenu(deleteSheetsMenu)
     .addSubMenu(automationMenu)
+    .addItem("How to Use", "showInstructions")
     .addToUi();
 }
 
@@ -287,7 +288,7 @@ function addSheetsAutomated() {
   const extraDaysProp = scriptProperties.getProperty("extraDaysToAdd");
   const futureOffsetProp = scriptProperties.getProperty("futureOffset");
   let extraDaysToAdd = Number(extraDaysProp);
-  let futureOffset = Number(futureOffsetProp);  
+  let futureOffset = Number(futureOffsetProp);
   addSheets(extraDaysToAdd, futureOffset);
 }
 
@@ -336,4 +337,111 @@ function addSheets(addExtra = 0, futureOffset = 0) {
       ss.moveActiveSheet(1);
     }
   }
+}
+function showInstructions() {
+  const htmlOutput = HtmlService.createHtmlOutput(
+    `<html>
+  <head>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 15px;
+      }
+      h1, h2, h3 {
+        color: #333366;
+      }
+      p, li {
+        color: #666666;
+      }
+      ul, ol {
+        margin-bottom: 15px;
+      }
+      .menu-item, .tab-name {
+        font-weight: bold;
+        color: #00509E;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>How to Use</h1>
+    <p>This script assists in managing daily workflows in a Google Spreadsheet by automating the creation and deletion of sheets based on a template. It's particularly useful for tracking daily tasks, such as homework assignments, by having a new sheet for each day.</p>
+    
+    <h2>Initial Setup:</h2>
+    <ol>
+      <li>Create a <span class="tab-name">TEMPLATE</span> tab with the layout and content you want each day's sheet to have.</li>
+    </ol>
+    
+    <h2>Manual Operations:</h2>
+    <p>You can manually create copies of your <span class="tab-name">TEMPLATE</span> for today or any number of days into the future using the <span class="menu-item">Create Sheets</span> submenu. Note that in manual mode, this script moves the latest date all the way to the left, ensuring that when users open the sheet, they see today's date first. This is especially helpful when you have lots of tabs!</p>
+    
+    <h2>Automation:</h2>
+    <p>Alternatively, you can set up an automation to create new sheets at a specified time each day! Navigate to the <span class="menu-item">Automation</span> submenu to configure and control automated sheet creation.</p>
+    
+    <h2>Examples:</h2>
+    <details>
+      <summary><span style="font-weight: bold; font-size: 1.17em;">Simplest Case: Create a New Tab Each Day</span></summary>
+      <p>Set up automation to create a new sheet based on the <span class="tab-name">TEMPLATE</span> every day at a specified time.</p>
+      <p><strong>Instructions:</strong></p>
+      <ol>
+        <li>Select <span class="menu-item">Automation > Set up automation</span>.</li>
+        <li>For "Which days?", type "All" to run every day.</li>
+        <li>For "What time?", type "6" to run at 6 AM.</li>
+        <li>For "Start how many days in the future?", type "0".</li>
+        <li>For "Create sheets for how many days?", type "1".</li>
+      </ol>
+    </details>
+    
+    <details>
+      <summary><span style="font-weight: bold; font-size: 1.17em;">Trickier Cases:</span></summary>
+      <p><strong>Example 1: Each Monday, Create Tabs for Monday Through Friday</strong></p>
+      <p>Configure the automation settings to create 5 sheets starting 0 days into the future. Set the trigger to run every Monday.</p>
+      <p><strong>Instructions:</strong></p>
+      <ol>
+        <li>Select <span class="menu-item">Automation > Set up automation</span>.</li>
+        <li>For "Which days?", type "M" to run on Mondays.</li>
+        <li>For "What time?", choose your preferred time.</li>
+        <li>For "Start how many days in the future?", type "0".</li>
+        <li>For "Create sheets for how many days?", type "5".</li>
+      </ol>
+      
+      <p><strong>Example 2: Each Friday, Create a Tab for the Next Monday</strong></p>
+      <p>Configure the automation settings to create 1 sheet starting 3 days into the future. Set the trigger to run every Friday.</p>
+      <p><strong>Instructions:</strong></p>
+      <ol>
+        <li>Select <span class="menu-item">Automation > Set up automation</span>.</li>
+        <li>For "Which days?", type "F" to run on Fridays.</li>
+        <li>For "What time?", choose your preferred time.</li>
+        <li>For "Start how many days in the future?", type "3".</li>
+        <li>For "Create sheets for how many days?", type "1".</li>
+      </ol>
+    </details>
+    
+    <h2>Menu Options:</h2>
+    <h3>Creating Daily Sheets:</h3>
+    <ul>
+      <li><span class="menu-item">Create Sheets > Create sheet for today:</span> Creates a new sheet for today based on the <span class="tab-name">TEMPLATE</span>.</li>
+      <li><span class="menu-item">Create Sheets > Create sheets for coming days:</span> Interactively create sheets for a number of upcoming days.</li>
+    </ul>
+    <h3>Deleting Daily Sheets</h3>
+    <ul>
+      <li><span class="menu-item">Delete Sheets > Delete Some Sheets:</span> Interactively select and delete sheets using regular expressions. Learn more about JavaScript regular expressions <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions" target="_blank">here</a>.</li>
+      <li><span class="menu-item">Delete Sheets > Delete All Sheets:</span> Deletes all sheets except for the <span class="tab-name">TEMPLATE</span>.</li>
+    </ul>
+    
+    <h3>Automation:</h3>
+    <ul>
+      <li><span class="menu-item">Automation > Test automation now:</span> Immediately runs the automated sheet creation based on your settings.</li>
+      <li><span class="menu-item">Automation > Set up automation:</span> Sets up a trigger to automatically create new sheets at a specified time.</li>
+      <li><span class="menu-item">Automation > Stop automation:</span> Removes any triggers, stopping automatic sheet creation.</li>
+      <li><span class="menu-item">Automation > Update settings for automation:</span> Adjust settings like the number of days to create sheets for and the starting day offset.</li>
+    </ul>
+    <p>Ensure to configure the settings under the <span class="menu-item">Automation</span> menu to suit your specific needs and schedule.</p>
+  </body>
+</html>
+
+  `
+  )
+    .setWidth(600)
+    .setHeight(450);
+  SpreadsheetApp.getUi().showModalDialog(htmlOutput, "Instructions");
 }
