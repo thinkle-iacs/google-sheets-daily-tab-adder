@@ -1,4 +1,10 @@
 /**
+ * 
+ * Note: a master version of this code should be kept in this 
+ * github repo: https://github.com/thinkle-iacs/google-sheets-daily-tab-adder
+ * 
+ * Please port improvements back there!
+ * 
  * ChangeLog:
  * 10/5/24
  * - Added ability to start adding sheets in the future.
